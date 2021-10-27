@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Input;
 using System.Windows.Controls;
-using System.Drawing; 
+using Whiteboard;
 
 namespace Client
 {
@@ -25,7 +26,7 @@ namespace Client
         /// <summary>
         /// Render fetched updates on canvas  
         /// </summary>
-        abstract void RenderUXElement();
+        abstract void RenderUXElement(List<UXShape> shps);
     }
 
     /// <summary>
@@ -33,7 +34,7 @@ namespace Client
     /// </summary>
     public class ShapeManager : IWhiteBoardUpdater
     {
-         
+
         private List<int> selectedShapes;
 
         /// <summary>
@@ -47,24 +48,48 @@ namespace Client
         /// <summary>
         /// Render fetched shape updates on canvas  
         /// </summary>
-        public void RenderUXElement()
+        public void RenderUXElement(List<UXShape> shps)
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Handle input events for selection  
+        /// </arg> Shape sh: The shape which is clicked on
+        /// </arg> int mode: 0 for single selection, 1 for multiple selection (i.e, Ctrl is pressed while a shape is clicked)
         /// </summary>
-        public void SelectShape()
+        public void SelectShape(Shape sh, int mode = 0)
         {
-            throw new NotImplementedException();
+            switch(mode)
+            {
+               //single shape selection case
+              case 0:
+                selectedShapes = new List<int> { int.Parse(sh.Uid) };
+                break;
+               //multiple shape selection case
+              case 1:
+                selectedShapes.Add(int.Parse(sh.Uid));
+                break;
+             }
+            return;
         }
 
         /// <summary>
         /// Create a new shape 
         /// </summary>
-        public void CreateShape()
+        public void CreateShape(WhiteBoardViewModel.WBTools activeTool)
         {
+            List<UXShape> toRender;
+            switch (activeTool)
+            {
+                case WhiteBoardViewModel.WBTools.NewLine:
+                    break;
+                case WhiteBoardViewModel.WBTools.NewRectangle:
+                    break;
+                case WhiteBoardViewModel.WBTools.NewEllipse:
+                    break;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -135,7 +160,7 @@ namespace Client
         /// <summary>
         /// Render FreeHand instances shape updates on canvas  
         /// </summary>
-        public void RenderUXElement()
+        public void RenderUXElement(List<UXShape> shps)
         {
             throw new NotImplementedException();
         }
@@ -147,9 +172,11 @@ namespace Client
     /// </summary>
     public class WhiteBoardViewModel 
     {
+        IWhiteBoardOperationHandler WBOps = new WhiteBoardOperationHandler();
+
 
         /// UX sets this enum to different options when user clicks on the appropriate tool icon
-        private enum WBTools
+        public enum WBTools
         {
             Initial, /// Initialised value, never to be used again
             Selection,
@@ -162,10 +189,10 @@ namespace Client
             FreeHand
         };
 
-        private Point start;
-        private Point end;
+        public Point start;
+        public Point end;
 
-        private WBTools activeTool;
+        public WBTools activeTool;
         private ShapeManager shapeManager;
         private FreeHand freeHand;
 
@@ -174,9 +201,9 @@ namespace Client
         /// </summary>
         public WhiteBoardViewModel()
         {
-            shapeManager = new ShapeManager();
-            freeHand = new FreeHand(); 
-            activeTool = WBTools.Initial;
+            this.shapeManager = new ShapeManager();
+            this.freeHand = new FreeHand(); 
+            this.activeTool = WBTools.Initial;
         }
 
         /// <summary>
@@ -206,9 +233,26 @@ namespace Client
         /// <summary>
         /// Handles click event on View 
         /// </summary>
-        public void HandleClickEvent()
+        public void HandleClickEvent(MouseButtonEventArgs bt )
         {
-            throw new NotImplementedException();
+
+            if (bt.RightButton == MouseButtonState.Pressed) {
+                
+            }
+            else if (bt.RightButton == MouseButtonState.Released)
+            {
+
+            }
+            else if (bt.LeftButton == MouseButtonState.Pressed)
+            {
+                
+            }
+            else if (bt.LeftButton == MouseButtonState.Released)
+            {
+
+            }
+
+            return;
         }
     }
 }

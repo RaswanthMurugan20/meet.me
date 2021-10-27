@@ -24,17 +24,21 @@ namespace Client
         private Button activeButton;
         private string buttonDefaultColor = "#EC407A";
         private string buttonSelectedColor = "#536DFE";
+        private WhiteBoardViewModel viewModel;
 
         public WhiteBoardView()
         {
             InitializeComponent();
-            WhiteBoardViewModel viewModel = new WhiteBoardViewModel();
+            viewModel = new WhiteBoardViewModel();
         }
 
         // Canvas Mouse actions 
         private void OnCanvasMouseButtonDown(object sender, MouseButtonEventArgs e)
         {
-            throw new NotImplementedException();
+           if (e.LeftButton == MouseButtonState.Pressed){
+                this.viewModel.start = e.GetPosition(MyCanvas);
+            }
+            
         }
 
         private void OnCanvasMouseButtonUp(object sender, MouseButtonEventArgs e)
