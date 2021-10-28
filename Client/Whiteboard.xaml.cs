@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Whiteboard;
+using Whiteboard.Client;
 
 namespace Client
 {
@@ -20,15 +22,17 @@ namespace Client
     /// 
     public partial class WhiteBoardView : Window
     {
-
         private Button activeButton;
         private string buttonDefaultColor = "#EC407A";
         private string buttonSelectedColor = "#536DFE";
         private WhiteBoardViewModel viewModel;
+        public Canvas GlobCanvas;
 
+      
         public WhiteBoardView()
         {
             InitializeComponent();
+            this.GlobCanvas = MyCanvas; 
             viewModel = new WhiteBoardViewModel();
         }
 
@@ -37,7 +41,7 @@ namespace Client
         {
            if (e.LeftButton == MouseButtonState.Pressed){
                 this.viewModel.start = e.GetPosition(MyCanvas);
-            }
+           }
             
         }
 
@@ -174,7 +178,6 @@ namespace Client
 
 
         }
-
         //Parent Window click event
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {

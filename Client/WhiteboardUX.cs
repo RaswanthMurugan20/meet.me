@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Drawing;
 using Whiteboard;
+using Whiteboard.Client;
 
 namespace Client
 {
+
+
     /// <summary>
     /// Interface which listens to fetched server updates by IWhiteBoardState and local updates by IShapeOperation
     /// </summary>
@@ -26,7 +30,7 @@ namespace Client
         /// <summary>
         /// Render fetched updates on canvas  
         /// </summary>
-        abstract void RenderUXElement(List<UXShape> shps);
+        abstract Canvas RenderUXElement(List<UXShape> shps, Canvas cn);
     }
 
     /// <summary>
@@ -41,14 +45,6 @@ namespace Client
         /// Fetch shape updates from IWhiteBoardState for rendering in the view   
         /// </summary>
         public void FetchServerUpdates()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Render fetched shape updates on canvas  
-        /// </summary>
-        public void RenderUXElement(List<UXShape> shps)
         {
             throw new NotImplementedException();
         }
@@ -75,54 +71,134 @@ namespace Client
         }
 
         /// <summary>
-        /// Create a new shape 
+        /// Creates a new shape 
         /// </summary>
-        public void CreateShape(WhiteBoardViewModel.WBTools activeTool)
+        public void CreateShape(Canvas cn, IWhiteBoardOperationHandler WBOps ,WhiteBoardViewModel.WBTools activeTool, Point strt, Point end, float strokeWidth, System.Drawing.Color strokeColor, string shapeId = null, bool shapeComp = false)
         {
             List<UXShape> toRender;
+            Coordinate C_strt = new Coordinate(strt.X, strt.Y);
+            Coordinate C_end = new Coordinate(end.X, end.Y);
+            Whiteboard.Color strk_clr = new Whiteboard.Color(strokeColor.R, strokeColor.G, strokeColor.B);
             switch (activeTool)
             {
                 case WhiteBoardViewModel.WBTools.NewLine:
+                    toRender = WBOps.CreateLine(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp );
+                    this.RenderUXElement(toRender, cn);
                     break;
                 case WhiteBoardViewModel.WBTools.NewRectangle:
+                    toRender = WBOps.CreateRectangle(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp);
+                    this.RenderUXElement(toRender, cn);
                     break;
                 case WhiteBoardViewModel.WBTools.NewEllipse:
+                    toRender = WBOps.CreateEllipse(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp);
+                    this.RenderUXElement(toRender, cn);
                     break;
             }
-
             throw new NotImplementedException();
         }
 
         /// <summary>
         /// Translate the shape according to input events  
+        /// </args> shps is the 'selectedShapes' list in the ViewModel
         /// </summary>
-        public void MoveShape()
+        public void MoveShape(Canvas cn, IWhiteBoardOperationHandler WBOps, Point strt, Point end, List<UXShape> shps, bool shapeComp)
         {
-            throw new NotImplementedException();
+            Coordinate C_strt = new Coordinate(strt.X, strt.Y);
+            Coordinate C_end = new Coordinate(end.X, end.Y);
+
+            List<String> shps_uids = new List<String>();
+            foreach (UXShape shp in shps)
+            {
+                //Assuming that UXShape has a UID entry for the current shape (TEMPORARY)
+                String uid = shp.UID;
+
+                //(TEMPORARY)
+                List<UXShape> modif_shps = WBOps.TranslateShape(C_strt, C_end, uid, shapeComp);
+                this.DeleteShape(modif_shps, cn);
+                this.RenderUXElement(modif_shps, cn);
+            }
+
         }
 
         /// <summary>
         /// Rotate the selected shape by input degrees  
+        /// </args> shps is the 'selectedShapes' list in the ViewModel
         /// </summary>
-        public void RotateShape()
+        public void RotateShape(Canvas cn, IWhiteBoardOperationHandler WBOps, Point strt, Point end, List<UXShape> shps, bool shapeComp)
         {
-            throw new NotImplementedException();
+            Coordinate C_strt = new Coordinate(strt.X, strt.Y);
+            Coordinate C_end = new Coordinate(end.X, end.Y);
+
+            List<String> shps_uids = new List<String>();
+            foreach (UXShape shp in shps)
+            {
+                //Assuming that UXShape has a UID entry for the current shape (TEMPORARY)
+                String uid = shp.UID;
+
+                //(TEMPORARY)
+                List<UXShape> modif_shps =  WBOps.RotateShape(C_strt, C_end, uid, shapeComp);
+                this.DeleteShape(modif_shps, cn);
+                this.RenderUXElement(modif_shps, cn);
+            }
         }
 
         /// <summary>
         /// Create a duplicate of selected shape on Canvas   
         /// </summary>
-        public void DuplicateShape()
+        public void DuplicateShape(IWhiteBoardOperationHandler WBOps, List<UXShape> shps)
         {
-            throw new NotImplementedException();
+            foreach (UXShape shp in shps)
+            {
+
+                //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
+                Shape s = shp.Shape;
+
+                //Write code to get appropriate start and end point locations for the duplicate shape at an offset of (10,10) from current shape
+                //OR
+                //Ask WB team to provide a function that does the above internally, eg. WBDuplicateShape(string uid, offs_x=10, offs_y=10)
+
+                //(TEMPORARY)
+                if (s is Line)
+                {
+                    WBOps.CreateLine
+                }
+                else if (s is System.Windows.Shapes.Rectangle)
+                {
+                    WBOps.CreateRectangle
+                }
+                else if (s is System.Windows.Shapes.Ellipse)
+                {
+                    WBOps.CreateEllipse
+                }
+
+            }
+
+        }
+
+        /// <summary>
+        /// Render fetched shape updates on canvas  
+        /// </summary>
+        public Canvas RenderUXElement(List<UXShape> shps, Canvas cn)
+        {
+            //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
+            cn.Children.Add(shps.Shape);
+            return cn;
         }
 
         /// <summary>
         /// Delete selected shape   
         /// </summary>
-        public void DeleteShape()
+        public Canvas DeleteShape(List<UXShape> shps_can, Canvas cn)
         {
-            throw new NotImplementedException();
+            foreach (UXShape shp in shps_can)
+            {
+                //Assuming that UXShape shp has a UID entry for the current shape (TEMPORARY)
+                foreach (var uiElement in cn.Children.OfType<UIElement>().Where(x => x.Uid == shp.UID))
+                {
+                    cn.Children.Remove(uiElement);
+                }
+            }
+            return cn;
         }
 
         /// <summary>
@@ -133,6 +209,7 @@ namespace Client
             throw new NotImplementedException();
         }
 
+
         /// <summary>
         /// Set background color of the selected shape   
         /// </summary>
@@ -142,7 +219,7 @@ namespace Client
         }
 
     }
-
+   
     /// <summary>
     /// Class to manage existing and new FreeHand instances by providing various methods by aggregating WhiteBoard Module    
     /// </summary>
@@ -160,9 +237,10 @@ namespace Client
         /// <summary>
         /// Render FreeHand instances shape updates on canvas  
         /// </summary>
-        public void RenderUXElement(List<UXShape> shps)
+        public Canvas RenderUXElement(List<UXShape> shps, Canvas cn)
         {
-            throw new NotImplementedException();
+            //Write implementation code
+            return cn;
         }
 
     }
@@ -173,7 +251,6 @@ namespace Client
     public class WhiteBoardViewModel 
     {
         IWhiteBoardOperationHandler WBOps = new WhiteBoardOperationHandler();
-
 
         /// UX sets this enum to different options when user clicks on the appropriate tool icon
         public enum WBTools
@@ -189,8 +266,8 @@ namespace Client
             FreeHand
         };
 
-        public Point start;
-        public Point end;
+        public System.Windows.Point start;
+        public System.Windows.Point end;
 
         public WBTools activeTool;
         private ShapeManager shapeManager;
@@ -209,9 +286,10 @@ namespace Client
         /// <summary>
         /// Changes the Background color of Canvas in View 
         /// </summary>
-        public void ChangeWbBackground()
+        public void ChangeWbBackground(System.Windows.Media.Color clr)
         {
-            throw new NotImplementedException();
+            MyCanvas.Background = new SolidColorBrush(clr);
+            return;
         }
 
         /// <summary>
@@ -227,7 +305,9 @@ namespace Client
         /// </summary>
         public void ChangePrivilegeSwitch()
         {
-            throw new NotImplementedException();
+            // ChangeBoardState() not declared by WB yet, temporary code here (TEMPORARY)
+            Whiteboard.BoardState bs = BoardState.ACTIVE;
+            return;
         }
 
         /// <summary>
