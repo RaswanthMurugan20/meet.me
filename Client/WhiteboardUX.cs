@@ -73,35 +73,45 @@ namespace Client
         /// <summary>
         /// Creates a new shape 
         /// </summary>
-        public void CreateShape(Canvas cn, IWhiteBoardOperationHandler WBOps ,WhiteBoardViewModel.WBTools activeTool, Point strt, Point end, float strokeWidth, System.Drawing.Color strokeColor, string shapeId = null, bool shapeComp = false)
+        public Canvas CreateShape(Canvas cn, IWhiteBoardOperationHandler WBOps ,WhiteBoardViewModel.WBTools activeTool, System.Windows.Point strt, System.Windows.Point end, float strokeWidth, System.Drawing.Color strokeColor, string shapeId = null, bool shapeComp = false)
         {
             List<UXShape> toRender;
             Coordinate C_strt = new Coordinate(strt.X, strt.Y);
             Coordinate C_end = new Coordinate(end.X, end.Y);
             Whiteboard.Color strk_clr = new Whiteboard.Color(strokeColor.R, strokeColor.G, strokeColor.B);
+hh
+            //Remove existing temporary shapes
+            if (shapeId != null && shapeComp == false)
+            {
+                foreach (var uiElement in cn.Children.OfType<UIElement>().Where(x => x.Uid == shapeId))
+                {
+                    cn.Children.Remove(uiElement);
+                }
+            }
+
             switch (activeTool)
             {
                 case WhiteBoardViewModel.WBTools.NewLine:
                     toRender = WBOps.CreateLine(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp );
-                    this.RenderUXElement(toRender, cn);
+                    cn = this.RenderUXElement(toRender, cn);
                     break;
                 case WhiteBoardViewModel.WBTools.NewRectangle:
                     toRender = WBOps.CreateRectangle(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp);
-                    this.RenderUXElement(toRender, cn);
+                    cn = this.RenderUXElement(toRender, cn);
                     break;
                 case WhiteBoardViewModel.WBTools.NewEllipse:
                     toRender = WBOps.CreateEllipse(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp);
-                    this.RenderUXElement(toRender, cn);
+                    cn = this.RenderUXElement(toRender, cn);
                     break;
             }
-            throw new NotImplementedException();
+            return cn;
         }
 
         /// <summary>
         /// Translate the shape according to input events  
         /// </args> shps is the 'selectedShapes' list in the ViewModel
         /// </summary>
-        public void MoveShape(Canvas cn, IWhiteBoardOperationHandler WBOps, Point strt, Point end, List<UXShape> shps, bool shapeComp)
+        public void MoveShape(Canvas cn, IWhiteBoardOperationHandler WBOps, System.Windows.Point strt, System.Windows.Point end, List<UXShape> shps, bool shapeComp)
         {
             Coordinate C_strt = new Coordinate(strt.X, strt.Y);
             Coordinate C_end = new Coordinate(end.X, end.Y);
@@ -117,7 +127,6 @@ namespace Client
                 this.DeleteShape(modif_shps, cn);
                 this.RenderUXElement(modif_shps, cn);
             }
-
         }
 
         /// <summary>
@@ -145,32 +154,35 @@ namespace Client
         /// <summary>
         /// Create a duplicate of selected shape on Canvas   
         /// </summary>
-        public void DuplicateShape(IWhiteBoardOperationHandler WBOps, List<UXShape> shps)
+        public void DuplicateShape(Canvas cn, IWhiteBoardOperationHandler WBOps, List<UXShape> shps, double offs_x = 10.0, double offs_y = 10.0)
         {
             foreach (UXShape shp in shps)
             {
-
+                List<UXShape> toRender;
                 //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
                 Shape s = shp.Shape;
+                double s_x = Canvas.GetLeft(s);
+                double s_y = Canvas.GetTop(s);
+                double ht = s.Height;
+                double wdth = s.Width;
 
                 //Write code to get appropriate start and end point locations for the duplicate shape at an offset of (10,10) from current shape
                 //OR
                 //Ask WB team to provide a function that does the above internally, eg. WBDuplicateShape(string uid, offs_x=10, offs_y=10)
-
                 //(TEMPORARY)
                 if (s is Line)
                 {
-                    WBOps.CreateLine
+                    toRender = WBOps.CreateLine();
                 }
                 else if (s is System.Windows.Shapes.Rectangle)
                 {
-                    WBOps.CreateRectangle
+                    toRender = WBOps.CreateRectangle();
                 }
                 else if (s is System.Windows.Shapes.Ellipse)
                 {
-                    WBOps.CreateEllipse
+                    toRender = WBOps.CreateEllipse();
                 }
-
+                //INCOMPLETE
             }
 
         }
@@ -180,8 +192,12 @@ namespace Client
         /// </summary>
         public Canvas RenderUXElement(List<UXShape> shps, Canvas cn)
         {
-            //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
-            cn.Children.Add(shps.Shape);
+            foreach (UXShape shp in shps)
+            {
+                //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
+                cn.Children.Add(shp.Shape);
+            }
+            
             return cn;
         }
 
@@ -202,12 +218,29 @@ namespace Client
         }
 
         /// <summary>
-        /// Adjust finer attributes of selected shape  
+        /// Adjust finer attributes of selected shape, like 
         /// </summary>
-        public void CustomizeShape()
+        public void CustomizeShape(List<UXShape> shps)
         {
             throw new NotImplementedException();
         }
+
+
+        /// <summary>
+        /// Resize the list of selected shapes 'selectedShapes' based on start and end points 
+        /// </summary>
+        public void ResizeShape(WhiteBoardOperationHandler WBOps, List<UXShape> shps, System.Windows.Point strt, System.Windows.Point end, bool shapeComp)
+        {
+            Coordinate C_strt = new Coordinate(strt.X, strt.Y);
+            Coordinate C_end = new Coordinate(end.X, end.Y);
+            foreach (UXShape shp in shps)
+            {
+                Shape s = shp.Shape;
+                WBOps.ResizeShape(C_strt, C_end, s.Uid, shapeComp);
+            }
+            return;
+        }
+        
 
 
         /// <summary>
@@ -286,10 +319,10 @@ namespace Client
         /// <summary>
         /// Changes the Background color of Canvas in View 
         /// </summary>
-        public void ChangeWbBackground(System.Windows.Media.Color clr)
+        public Canvas ChangeWbBackground(Canvas cn, System.Windows.Media.Color clr)
         {
-            MyCanvas.Background = new SolidColorBrush(clr);
-            return;
+            cn.Background = new SolidColorBrush(clr);
+            return cn;
         }
 
         /// <summary>
