@@ -17,9 +17,8 @@ using Whiteboard.Client;
 namespace Client
 {
     /// <summary>
-    /// Interaction logic for Window1.xaml
+    /// Interaction logic for Whiteboard.xaml
     /// </summary>
-    /// 
     public partial class WhiteBoardView : Window
     {
         private Button activeButton;
@@ -84,7 +83,7 @@ namespace Client
                 activeButton.ClearValue(Button.BackgroundProperty);
             }
 
-            if(this.SelectToolBar.Visibility == Visibility.Collapsed)
+            if (this.SelectToolBar.Visibility == Visibility.Collapsed)
             {
                 this.SelectToolBar.Visibility = Visibility.Visible;
             }
@@ -231,7 +230,7 @@ namespace Client
         //Parent Window click event
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed)
             {
                 DragMove();
             }
