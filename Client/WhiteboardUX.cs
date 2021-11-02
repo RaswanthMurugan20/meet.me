@@ -79,7 +79,7 @@ namespace Client
             Coordinate C_strt = new Coordinate(strt.X, strt.Y);
             Coordinate C_end = new Coordinate(end.X, end.Y);
             Whiteboard.Color strk_clr = new Whiteboard.Color(strokeColor.R, strokeColor.G, strokeColor.B);
-hh
+
             //Remove existing temporary shapes
             if (shapeId != null && shapeComp == false)
             {
@@ -92,7 +92,8 @@ hh
             switch (activeTool)
             {
                 case WhiteBoardViewModel.WBTools.NewLine:
-                    toRender = WBOps.CreateLine(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp );
+                    toRender = WBOps.CreateLine(C_strt, C_end, strokeWidth, strk_clr, shapeId, shapeComp ); //return is of form List of UXShape
+                    //to lock DELETE then INSERT
                     cn = this.RenderUXElement(toRender, cn);
                     break;
                 case WhiteBoardViewModel.WBTools.NewRectangle:
@@ -124,7 +125,6 @@ hh
 
                 //(TEMPORARY)
                 List<UXShape> modif_shps = WBOps.TranslateShape(C_strt, C_end, uid, shapeComp);
-                this.DeleteShape(modif_shps, cn);
                 this.RenderUXElement(modif_shps, cn);
             }
         }
@@ -146,7 +146,6 @@ hh
 
                 //(TEMPORARY)
                 List<UXShape> modif_shps =  WBOps.RotateShape(C_strt, C_end, uid, shapeComp);
-                this.DeleteShape(modif_shps, cn);
                 this.RenderUXElement(modif_shps, cn);
             }
         }
@@ -192,10 +191,14 @@ hh
         /// </summary>
         public Canvas RenderUXElement(List<UXShape> shps, Canvas cn)
         {
+            //UXShape has attribute
             foreach (UXShape shp in shps)
             {
-                //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
-                cn.Children.Add(shp.Shape);
+                if (shp.operation == Whiteboard.CREATE){
+                    //assuming that shp.Shape gives the System.Windows.Shapes instance (TEMPORARY)
+                    cn.Children.Add(shp.shape);
+                }
+                //else
             }
             
             return cn;
@@ -206,14 +209,7 @@ hh
         /// </summary>
         public Canvas DeleteShape(List<UXShape> shps_can, Canvas cn)
         {
-            foreach (UXShape shp in shps_can)
-            {
-                //Assuming that UXShape shp has a UID entry for the current shape (TEMPORARY)
-                foreach (var uiElement in cn.Children.OfType<UIElement>().Where(x => x.Uid == shp.UID))
-                {
-                    cn.Children.Remove(uiElement);
-                }
-            }
+            //Whiteboard.DeleteShape
             return cn;
         }
 
