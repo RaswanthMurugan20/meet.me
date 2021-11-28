@@ -102,6 +102,7 @@ namespace Client.ViewModel
                                 // Problem in the network connection
                                 if (mtype == -2)
                                 {
+                                    MainWindow.s_sharing = false;
                                     BitmapImage image = new BitmapImage(new Uri(ImagePath, UriKind.RelativeOrAbsolute));
                                     this.ReceivedImage = image;
 
@@ -114,6 +115,7 @@ namespace Client.ViewModel
                                 }
                                 else if (mtype == -1) // some one else is sharing so u can't share ur screen
                                 {
+                                    MainWindow.s_sharing = false;
                                     BitmapImage image = new BitmapImage(new Uri(ImagePath, UriKind.RelativeOrAbsolute));
                                     this.ReceivedImage = image;
 
@@ -129,6 +131,7 @@ namespace Client.ViewModel
                                 }
                                 else if (mtype == 0)  // Stop the screen share
                                 {
+                                    MainWindow.s_sharing = false;
                                     BitmapImage image = new BitmapImage(new Uri(ImagePath, UriKind.RelativeOrAbsolute));
                                     this.ReceivedImage = image;
 
@@ -141,6 +144,7 @@ namespace Client.ViewModel
                                 }
                                 else if (mtype == 1)  // screen share is going now
                                 {
+                                    MainWindow.s_sharing = true;
                                     BitmapImage image = ToBitmapImage(screen);
                                     this.ReceivedImage = image;
 
@@ -152,7 +156,8 @@ namespace Client.ViewModel
                                     this.OnPropertyChanged("ReceivedImage");
                                 }
                                 else
-                                { 
+                                {
+                                    MainWindow.s_sharing = false;
                                     BitmapImage image = new BitmapImage(new Uri(ImagePath, UriKind.RelativeOrAbsolute));
                                     this.ReceivedImage = image;
 

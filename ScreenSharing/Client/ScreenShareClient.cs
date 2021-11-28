@@ -229,7 +229,7 @@ namespace ScreenSharing
 						}
 						else
 						{
-							return;
+							continue;
 						}
 
 						Thread.Sleep(1000);
@@ -346,15 +346,15 @@ namespace ScreenSharing
             }
 		}
 
-		/// <summary>
-		/// This is the destructor.
-		/// </summary>
-		~ScreenShareClient()
-		{
-			IsNotifying = false;
-			IsSharing = false;
-			ThisSharing = false;
-			Timer.Dispose();
-		}
-	}
+        /// <summary>
+        /// This is the destructor.
+        /// </summary>
+        ~ScreenShareClient()
+        {
+            IsNotifying = false;
+            IsSharing = false;
+            ThisSharing = false;
+            Timer.Dispose();
+        }
+    }
 }

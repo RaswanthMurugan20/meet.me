@@ -152,10 +152,10 @@ namespace ScreenSharing
                 Trace.WriteLine(ex.Message);
             }
 		}
-		~ScreenShareServer()
-		{
-			IsSharing = false;
-			Timer.Dispose();
-		}
-	}
+        ~ScreenShareServer()
+        {
+            IsSharing = false;
+            Timer.Dispose();
+        }
+    }
 }
